@@ -183,6 +183,12 @@ reply::reply(http_response&& resp)
         , _version(std::move(resp._version))
 {
     sstring length_header = get_header("Content-Length");
+    // Quick and dirty fix to mitigate lack of case-insensitive headers support
+    // Already fixed properly by upstream https://github.com/scylladb/seastar/commit/58f97fc5b3a492952780c35ae53dfc547f77f815
+    // but not yet available in scylla-seastar used by scylla-5.2.4
+    if (length_header == "") {
+        length_header = get_header("content-length");
+    }
     content_length = strtol(length_header.c_str(), nullptr, 10);
 }
 
