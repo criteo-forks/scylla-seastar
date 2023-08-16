@@ -126,7 +126,10 @@ input_stream<char> connection::in(reply& rep) {
 }
 
 future<> connection::close() {
-    return when_all(_read_buf.close(), _write_buf.close()).discard_result();
+    return when_all(
+        _read_buf.close().handle_exception([] (auto ignored) {}),
+        _write_buf.close().handle_exception([] (auto ignored) {}))
+        .discard_result();
 }
 
 } // experimental namespace
